@@ -1,3 +1,17 @@
+"""
+Simple Face Recognition Desktop App
+
+This application provides a simple interface for user login, logout, and registration using face recognition. 
+It uses libraries like dlib, OpenCV, and face_recognition to detect and recognize faces.
+
+Dependencies:
+- cmake==3.17.2
+- dlib==19.18.0
+- opencv-python==4.6.0.66
+- Pillow==9.2.0
+- face_recognition==1.3.0
+"""
+
 import os.path
 import datetime
 import pickle
@@ -10,6 +24,7 @@ import face_recognition
 import util
 
 
+# Main Window User Interface setup
 class App:
     def __init__(self):
         self.main_window = tk.Tk()
@@ -36,6 +51,7 @@ class App:
 
         self.log_path = './log.txt'
 
+# Accessing user webcam
     def add_webcam(self, label):
         for index in range(10):
             cap = cv2.VideoCapture(index)
@@ -48,6 +64,7 @@ class App:
         self._label = label
         self.process_webcam()
 
+# Processing webcam image
     def process_webcam(self):
         ret, frame = self.cap.read()
         if not ret:
@@ -64,6 +81,7 @@ class App:
 
         self._label.after(20, self.process_webcam)
 
+# User login functionality
     def login(self):
         name = util.recognize(self.most_recent_capture_arr, self.db_dir)
         if name in ['unknown_person', 'no_persons_found']:
@@ -73,6 +91,7 @@ class App:
             with open(self.log_path, 'a') as f:
                 f.write('{},{},in\n'.format(name, datetime.datetime.now()))
 
+# User logout functionality
     def logout(self):
         name = util.recognize(self.most_recent_capture_arr, self.db_dir)
         if name in ['unknown_person', 'no_persons_found']:
@@ -82,6 +101,7 @@ class App:
             with open(self.log_path, 'a') as f:
                 f.write('{},{},out\n'.format(name, datetime.datetime.now()))
 
+# Function to register new user
     def register_new_user(self):
         self.register_new_user_window = tk.Toplevel(self.main_window)
         self.register_new_user_window.geometry("1200x520+370+120")
@@ -103,9 +123,11 @@ class App:
         self.text_label_register_new_user = util.get_text_label(self.register_new_user_window, 'Please, \ninput username:')
         self.text_label_register_new_user.place(x=750, y=70)
 
+# Closes window to reregister user if  failed.
     def try_again_register_new_user(self):
         self.register_new_user_window.destroy()
 
+#Updates the Interface label with most recent capture
     def add_img_to_label(self, label):
         imgtk = ImageTk.PhotoImage(image=self.most_recent_capture_pil)
         label.imgtk = imgtk
@@ -113,9 +135,11 @@ class App:
 
         self.register_new_user_capture = self.most_recent_capture_arr.copy()
 
+# This begins the main event loop for the application.
     def start(self):
         self.main_window.mainloop()
 
+# Registers a new user by saving their face embeddings to a file.
     def accept_register_new_user(self):
         name = self.entry_text_register_new_user.get(1.0, "end-1c")
 
